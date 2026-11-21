@@ -67,4 +67,4 @@ Works in current versions of Chrome, Edge, Safari and Firefox. The rotating glow
 
 ## License
 
-Add the license you prefer, for example MIT.
+MIT License – This project is open-source. Anyone can use, copy, modify, and distribute the code, provided the original copyright and license notice are included.
