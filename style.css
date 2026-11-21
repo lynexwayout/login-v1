@@ -1,0 +1,755 @@
+/* ==========================================================================
+   Orb Login – styles
+   ========================================================================== */
+
+
+/* --------------------------------------------------------------------------
+   1. Variables & base
+   -------------------------------------------------------------------------- */
+
+/* Animatable angle, used for the rotating glow behind the card */
+@property --angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+
+:root {
+  color-scheme: light;
+
+  --bg: #e9ebf2;
+  --ink: #12131f;
+  --muted: #6b6f85;
+  --line: rgba(18, 19, 31, 0.1);
+  --field: #f1f2f8;
+
+  --accent-1: #6a5cff;
+  --accent-2: #ff7ac6;
+  --accent-3: #35d6ff;
+  --error: #e5484d;
+
+  --rainbow: linear-gradient(120deg, #6a5cff, #ff7ac6 55%, #35d6ff);
+}
+
+html {
+  box-sizing: border-box;
+  /* keep content clear of phone notches / home bars */
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  scroll-padding-top: env(safe-area-inset-top, 0px);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+}
+
+body {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px 16px;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: "DM Sans", system-ui, Arial, sans-serif;
+  overflow-x: hidden;
+}
+
+button,
+input {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+  border: 0;
+  background: none;
+}
+
+a {
+  color: var(--ink);
+  font-weight: 500;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+a:hover {
+  color: var(--accent-1);
+}
+
+
+/* --------------------------------------------------------------------------
+   2. Background
+   -------------------------------------------------------------------------- */
+
+.background {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  /* --mx / --my are updated from script.js so the light follows the mouse */
+  background:
+    radial-gradient(circle at var(--mx, 50%) var(--my, 30%), rgba(255, 255, 255, 0.9), transparent 40%),
+    var(--bg);
+}
+
+/* dot grid, faded out towards the edges */
+.background::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgba(18, 19, 31, 0.13) 1px, transparent 1.2px);
+  background-size: 26px 26px;
+  -webkit-mask: radial-gradient(70% 60% at 50% 40%, #000, transparent);
+  mask: radial-gradient(70% 60% at 50% 40%, #000, transparent);
+}
+
+.blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  animation: drift 16s ease-in-out infinite;
+}
+
+.blob-1 {
+  width: 440px;
+  height: 440px;
+  background: #a99bff;
+  opacity: 0.5;
+  left: -10%;
+  top: -6%;
+}
+
+.blob-2 {
+  width: 400px;
+  height: 400px;
+  background: #ffb3dd;
+  opacity: 0.5;
+  right: -8%;
+  top: 30%;
+  animation-delay: -5s;
+}
+
+.blob-3 {
+  width: 360px;
+  height: 360px;
+  background: #9fe9ff;
+  opacity: 0.55;
+  left: 30%;
+  bottom: -12%;
+  animation-delay: -9s;
+}
+
+@keyframes drift {
+  50% {
+    transform: translate(80px, -60px) scale(1.18);
+  }
+}
+
+
+/* --------------------------------------------------------------------------
+   3. Stage & orb
+   -------------------------------------------------------------------------- */
+
+#stage {
+  position: relative;
+  z-index: 2;
+  width: min(420px, 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+#orb {
+  display: block;
+  position: relative;
+  z-index: 1;
+  width: min(350px, 88vw);
+  margin-bottom: -24px;
+
+  /* starts small and invisible, pops in when body gets the .ready class */
+  transform: scale(0.3) translateY(60px);
+  opacity: 0;
+  transition:
+    transform 1.4s 0.2s cubic-bezier(0.34, 1.56, 0.5, 1),
+    opacity 0.6s 0.2s;
+
+  animation: float 5.5s ease-in-out infinite;
+}
+
+.ready #orb {
+  transform: none;
+  opacity: 1;
+}
+
+@keyframes float {
+  50% {
+    translate: 0 -9px;
+  }
+}
+
+/* shadow under the orb shrinks while the orb floats up */
+#orb-shadow {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: shadow-pulse 5.5s ease-in-out infinite;
+}
+
+@keyframes shadow-pulse {
+  50% {
+    transform: scale(0.82);
+    opacity: 0.6;
+  }
+}
+
+/* The pupil is scaled from script.js, so it must scale around its own centre */
+#pupil {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+
+/* --------------------------------------------------------------------------
+   4. Card
+   -------------------------------------------------------------------------- */
+
+.frame {
+  position: relative;
+  z-index: 2;
+  isolation: isolate;
+  width: 100%;
+  animation: rise 1.1s 0.15s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* rotating rainbow glow behind the card */
+.frame::before {
+  content: "";
+  position: absolute;
+  inset: -12px;
+  z-index: -1;
+  border-radius: 46px;
+  background: conic-gradient(from var(--angle), #6a5cff, #ff7ac6, #35d6ff, #6a5cff);
+  filter: blur(36px);
+  opacity: 0.38;
+  animation: spin 8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    --angle: 360deg;
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(60px) scale(0.95);
+  }
+}
+
+.card {
+  position: relative;
+  overflow: hidden;
+  padding: 34px 28px 24px;
+  border-radius: 32px;
+  background: rgba(255, 255, 255, 0.74);
+  border: 1px solid rgba(255, 255, 255, 0.95);
+  box-shadow:
+    0 30px 80px rgba(60, 50, 140, 0.2),
+    inset 0 1px 0 #fff;
+  backdrop-filter: blur(26px) saturate(1.5);
+  -webkit-backdrop-filter: blur(26px) saturate(1.5);
+}
+
+
+/* --------------------------------------------------------------------------
+   5. Entrance animation (children fade in one after another)
+   -------------------------------------------------------------------------- */
+
+.stagger > * {
+  opacity: 0;
+  transform: translateY(20px);
+  transition:
+    opacity 0.7s,
+    transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.ready .stagger > * {
+  opacity: 1;
+  transform: none;
+}
+
+.stagger > :nth-child(1) { transition-delay: 0.7s; }
+.stagger > :nth-child(2) { transition-delay: 0.8s; }
+.stagger > :nth-child(3) { transition-delay: 0.9s; }
+.stagger > :nth-child(4) { transition-delay: 1.0s; }
+.stagger > :nth-child(5) { transition-delay: 1.1s; }
+.stagger > :nth-child(6) { transition-delay: 1.2s; }
+.stagger > :nth-child(7) { transition-delay: 1.3s; }
+.stagger > :nth-child(8) { transition-delay: 1.4s; }
+.stagger > :nth-child(9) { transition-delay: 1.5s; }
+
+
+/* --------------------------------------------------------------------------
+   6. Heading with letters that slide up (markup is built in script.js)
+   -------------------------------------------------------------------------- */
+
+.word {
+  display: inline-block;
+  white-space: nowrap;
+}
+
+/* the mask hides the letter until it slides up into view */
+.mask {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: top;
+  padding: 0.04em 0 0.14em;
+}
+
+.letter {
+  display: inline-block;
+  transform: translateY(125%);
+  transition: transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.reveal .letter {
+  transform: none;
+}
+
+h1 {
+  font-family: "Bricolage Grotesque", system-ui, sans-serif;
+  font-size: 42px;
+  font-weight: 800;
+  letter-spacing: -0.045em;
+  line-height: 1;
+}
+
+.lead {
+  margin: 8px 0 24px;
+  color: var(--muted);
+  font-size: 15px;
+}
+
+
+/* --------------------------------------------------------------------------
+   7. Form fields
+   -------------------------------------------------------------------------- */
+
+.field {
+  position: relative;
+  margin-bottom: 12px;
+}
+
+.field input {
+  width: 100%;
+  height: 60px;
+  padding: 22px 50px 0 54px;
+  border: 1.5px solid transparent;
+  border-radius: 18px;
+  background: var(--field);
+  outline: none;
+  font-size: 16px;
+  box-shadow: inset 0 2px 5px rgba(18, 19, 31, 0.05);
+  transition: all 0.3s;
+}
+
+.field:hover input {
+  background: #ebecf4;
+}
+
+.field input:focus {
+  background: #fff;
+  border-color: var(--accent-1);
+  box-shadow:
+    0 0 0 5px rgba(106, 92, 255, 0.14),
+    0 10px 30px rgba(106, 92, 255, 0.15);
+}
+
+/* floating label: needs placeholder=" " on the input */
+.field label {
+  position: absolute;
+  left: 54px;
+  top: 20px;
+  color: var(--muted);
+  pointer-events: none;
+  transform-origin: left;
+  transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.field input:focus + label,
+.field input:not(:placeholder-shown) + label {
+  transform: translateY(-11px) scale(0.76);
+  color: var(--accent-1);
+}
+
+.field-icon {
+  position: absolute;
+  left: 12px;
+  top: 12px;
+  width: 36px;
+  height: 36px;
+  padding: 8px;
+  border-radius: 12px;
+  background: #fff;
+  color: var(--muted);
+  box-shadow: 0 2px 8px rgba(18, 19, 31, 0.08);
+  transition: all 0.35s;
+}
+
+.field:focus-within .field-icon {
+  background: var(--rainbow);
+  color: #fff;
+  transform: rotate(-8deg) scale(1.08);
+}
+
+/* show / hide password button */
+#toggle-password {
+  position: absolute;
+  right: 9px;
+  top: 9px;
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border-radius: 13px;
+  color: var(--muted);
+  transition: all 0.2s;
+}
+
+#toggle-password:hover {
+  color: var(--ink);
+  background: rgba(18, 19, 31, 0.06);
+}
+
+/* password strength bar */
+.strength {
+  height: 5px;
+  margin: -2px 2px 14px;
+  border-radius: 5px;
+  background: rgba(18, 19, 31, 0.07);
+  overflow: hidden;
+}
+
+#strength-bar {
+  height: 100%;
+  width: 0;
+  border-radius: 5px;
+  background: var(--rainbow);
+  transition: width 0.6s cubic-bezier(0.34, 1.4, 0.5, 1);
+}
+
+/* validation message (slides open when .show is added) */
+.error-message {
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  color: var(--error);
+  font-size: 13.5px;
+  transition: all 0.4s;
+}
+
+.error-message.show {
+  max-height: 40px;
+  opacity: 1;
+  margin-bottom: 12px;
+}
+
+
+/* --------------------------------------------------------------------------
+   8. "Keep me signed in" switch + forgot password
+   -------------------------------------------------------------------------- */
+
+.options-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 2px 2px 20px;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.switch {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.switch input {
+  display: none;
+}
+
+.switch-track {
+  position: relative;
+  width: 40px;
+  height: 23px;
+  border-radius: 20px;
+  background: rgba(18, 19, 31, 0.14);
+  transition: background 0.3s;
+}
+
+/* the round knob */
+.switch-track::after {
+  content: "";
+  position: absolute;
+  left: 3px;
+  top: 3px;
+  width: 17px;
+  height: 17px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+  transition: transform 0.35s cubic-bezier(0.34, 1.7, 0.5, 1);
+}
+
+.switch input:checked + .switch-track {
+  background: var(--rainbow);
+}
+
+.switch input:checked + .switch-track::after {
+  transform: translateX(17px);
+}
+
+
+/* --------------------------------------------------------------------------
+   9. Buttons
+   -------------------------------------------------------------------------- */
+
+.submit-button {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border-radius: 18px;
+  background: var(--ink);
+  color: #fff;
+  font-weight: 700;
+  font-size: 16.5px;
+  box-shadow: 0 16px 36px rgba(18, 19, 31, 0.3);
+  transition:
+    transform 0.25s,
+    box-shadow 0.3s;
+}
+
+.submit-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 22px 46px rgba(106, 92, 255, 0.4);
+}
+
+.submit-button:active {
+  transform: scale(0.96);
+}
+
+/* rainbow layer that fades in on hover */
+.submit-button::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: var(--rainbow);
+  opacity: 0;
+  transition: opacity 0.4s;
+}
+
+.submit-button:hover::after {
+  opacity: 1;
+}
+
+/* keep the text and arrow above the rainbow layer */
+.submit-button > * {
+  position: relative;
+  z-index: 1;
+}
+
+.submit-button svg {
+  transition: transform 0.3s;
+}
+
+.submit-button:hover svg {
+  transform: translateX(5px);
+}
+
+/* loading spinner (shown while .is-loading is on the form) */
+.spinner {
+  display: none;
+  width: 22px;
+  height: 22px;
+  border: 3px solid rgba(255, 255, 255, 0.35);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: rotate 0.7s linear infinite;
+}
+
+@keyframes rotate {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.is-loading .spinner {
+  display: block;
+}
+
+.is-loading .button-label,
+.is-loading .submit-button svg {
+  display: none;
+}
+
+/* Passkey / Magic link buttons */
+.alt-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.alt-actions button {
+  flex: 1;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1.5px solid var(--line);
+  border-radius: 15px;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.25s;
+}
+
+.alt-actions button:hover {
+  border-color: var(--accent-1);
+  background: #fff;
+  transform: translateY(-2px);
+}
+
+.footer-text {
+  margin-top: 18px;
+  text-align: center;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+
+/* --------------------------------------------------------------------------
+   10. Success state (.is-done is added to the card)
+   -------------------------------------------------------------------------- */
+
+.login-form {
+  transition:
+    opacity 0.5s,
+    transform 0.6s;
+}
+
+.is-done .login-form {
+  opacity: 0;
+  transform: translateY(-20px);
+  pointer-events: none;
+}
+
+.success {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 8px;
+  text-align: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.6s 0.4s;
+}
+
+.is-done .success {
+  opacity: 1;
+}
+
+.success svg {
+  width: 92px;
+  height: 92px;
+}
+
+/* the checkmark is "drawn" by animating stroke-dashoffset */
+.success circle,
+.success path {
+  fill: none;
+  stroke: url(#success-gradient);
+  stroke-width: 4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 230;
+  stroke-dashoffset: 230;
+}
+
+.is-done .success circle {
+  animation: draw 1s 0.5s forwards;
+}
+
+.is-done .success path {
+  animation: draw 0.6s 1.2s forwards;
+}
+
+@keyframes draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.success h2 {
+  margin-top: 8px;
+  font-family: "Bricolage Grotesque", sans-serif;
+  font-size: 30px;
+  letter-spacing: -0.04em;
+}
+
+.success p {
+  color: var(--muted);
+}
+
+
+/* --------------------------------------------------------------------------
+   11. Error shake (.shake is added to #stage when validation fails)
+   -------------------------------------------------------------------------- */
+
+.shake #orb {
+  animation: shake 0.55s;
+}
+
+.shake .frame {
+  animation: shake 0.55s;
+}
+
+@keyframes shake {
+  20% { transform: translateX(-10px) rotate(-2deg); }
+  40% { transform: translateX(9px) rotate(2deg); }
+  60% { transform: translateX(-6px); }
+  80% { transform: translateX(4px); }
+}
+
+
+/* --------------------------------------------------------------------------
+   12. Responsive & accessibility
+   -------------------------------------------------------------------------- */
+
+@media (max-width: 420px) {
+  .card {
+    padding: 28px 18px 20px;
+  }
+
+  h1 {
+    font-size: 36px;
+  }
+}
+
+/* people who prefer less motion get near-instant transitions */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01s !important;
+    transition-duration: 0.01s !important;
+  }
+}
